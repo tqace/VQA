@@ -1,0 +1,7 @@
+*.pickle
+*.npz
+*.json
+*.zip
+*.h5
+*.txt
+*.pth

@@ -1,0 +1,84 @@
+mode:
+  mode: trainval # trainval traintest test
+  multi_choice: False #
+
+dirs:
+  data_dir: data 
+  resource: data/resource
+  intermedia: data/intermedia
+  coco_feature: data/resource/features
+  vqa1: data/resource/vqa1
+  vqa2: data/resource/vqa2
+  vqa_tool: data/resource/VQATools
+  vgenome: data/resource/vgenome
+  result:
+    log_dir: data/result/logs
+    checkpoint: data/result/checkpoint
+    debug: data/result/debug
+    test: data/result/test
+
+coco:
+  train_split: train2014 # train2014+val2014+vgnome
+  val_split: val2014 # train2014+val2014
+  test_split: test2015+testdev2015 # test2015+testdev2015
+  feature:
+    type: mcb # mcb, hdf5 ...
+    preload: False
+
+vqa:
+  type: vqa2 # vqa1, vqa2
+  nans: 3000
+  maxlength: 15
+  minwcount: 0
+  target_answer:  occurance_prob # most_common random_sample occurance_prob vqa_score vqa_prob 
+
+vgenome:
+  base_question_id: 1000000000 # current question is the sum of base_question_id and raw question id
+  base_image_id:    1000000000 # current image id is the sum of base_image_id and raw image id
+  contrib_to_vocab: True # whether to use vgenome word in vocabulary
+
+optim:
+  optimizer: Adam
+  lr: 0.0001
+  max_epoch: 16
+  batch_size: 128
+  workers: 8 # Note: if your h5py doesn't support mpi, the workers must be set to 0 
+  resume: data/result/checkpoint/checkpoint_epoch05.pth
+  use_cudnn_benchmark: True
+  specific_lr:
+    iq_branch1_linear.weight: 0.5
+    lookup_table.weight: 0.5
+  criterion:
+    type: BCELoss # CrossEntropyLoss BCELoss BCEWithLogitsLoss
+    normalize: batch_size # none, batch_size, element
+  display_interval: 20
+  grad_clip_type: norm # none, norm
+  grad_clip_value: 0.25
+  validation:
+    interval: 1
+  snapshot:
+    interval: 1
+
+snapshot:
+  prefix: checkpoint_AC  # the full path is "opt['dirs']['result']['checkpoint'] + '/prefix_epoch<epoch>.pth'"
+  interval: 1 # 0 for not snapshot
+  model: True 
+  optimizer: False # NotImplemented
+  device: True
+  force_to_cpu: True  # force the data to cpu
+
+model:
+  type: teney
+  init_with_glove: stanford # none, google, stanford
+
+test:
+  save_prob: False # wheathre to save prob
+  models: # specify which models to test
+    type: range # interval, epoch, range, model_path
+    interval: 2
+    epoch: [4,5,6,7,8,9,10]
+    range: [1,16,1] # like range() in python
+    model_path: none # only used in test mode
+
+AC:
+  topK: 10
